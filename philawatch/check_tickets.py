@@ -7,6 +7,10 @@ from typing import Any
 import requests
 import click
 
+from logging import getLogger
+
+LOGGER = getLogger(__name__)
+
 
 def find_event(name: str) -> Event | None:
     req = requests.get(
@@ -27,19 +31,21 @@ def check_tickets_event(name: str, min_tickets: int, wanted_dates: list[datetime
     event = find_event(name=name)
 
     if not event:
-        print(f"No event found with name: {name}.")
+        LOGGER.warning(f"No event found with name: {name}.")
         return
 
-    print(f"Found matching event: {event.name}!")
+    LOGGER.debug(f"Found matching event: {event.name}!")
 
     if event.available_quantity < min_tickets:
-        print(f"Only {event.available_quantity} tickets available, need {min_tickets}")
+        LOGGER.debug(
+            f"Only {event.available_quantity} tickets available, need {min_tickets}"
+        )
         return
 
     if wanted_dates and not any(
         wanted_date in event.dates for wanted_date in wanted_dates
     ):
-        print(f"No tickets for dates {wanted_dates}")
+        LOGGER.debug(f"No tickets for dates {wanted_dates}")
         return
 
     return event
