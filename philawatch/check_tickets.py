@@ -6,7 +6,6 @@ from philawatch.models import Event
 from typing import Any
 import requests
 import click
-
 from logging import getLogger
 
 LOGGER = getLogger(__name__)
@@ -19,7 +18,12 @@ def find_event(name: str) -> Event | None:
             "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.3"
         },
     )
-    events: list[dict[str, Any]] = req.json()["topicWithProductsList"][0]["products"]
+    try:
+        events: list[dict[str, Any]] = req.json()["topicWithProductsList"][0]["products"]
+    except Exception:
+        LOGGER.exception(f"Can't process data: {req.text}")
+        return None
+
     for event_json in events:
         event = Event.from_json(event_json)
 
